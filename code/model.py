@@ -12,6 +12,14 @@ class MeshedMemoryModel(tf.keras.Model):
         
         # TODO: initialize other hyper perameters and layers
 
+        # Remember equation 3 when implenting!
+        self.attention = tf.keras.layers.Attention() #might make sense to put in encoder
+        
+        self.encoder = tf.keras.Sequential()
+        # probably wrong...
+        self.encoder.add(tf.keras.layers.Dense(100, activation='relu'))
+        self.encoder.add(tf.keras.layers.Dense(100))
+
         self.optimizer = tf.keras.optimizers.Adam(self.learning_rate)
 
     @tf.function
