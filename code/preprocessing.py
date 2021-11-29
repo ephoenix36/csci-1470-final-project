@@ -13,7 +13,7 @@ def get_data(training_file, testing_file):
     with open(training_file, 'r') as file:
         train_dict = json.load(file)
 
-     # these are the different dictionaries inside the dataset
+    # these are the different dictionaries inside the dataset
     # info
     # images
     # licenses
@@ -34,7 +34,7 @@ def get_data(training_file, testing_file):
         except:
             print(i)
 
-    
+
     print(train_dict["images"][0]["id"])
     print(train_dict["annotations"][train_dict["images"][0]["id"]])
 
