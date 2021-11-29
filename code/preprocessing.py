@@ -3,54 +3,59 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 import json
 from skimage import io
+from pycocotools.coco import COCO as cocoDataset
+import fiftyone as fo
+import fiftyone.zoo as foz
 
 def get_data(training_file, testing_file):
     """
     gets the training data from the data folder in the json file
     """
-    
-    # opens the json as a python dictionary
-    with open(training_file, 'r') as file:
-        train_dict = json.load(file)
 
-    # these are the different dictionaries inside the dataset
-    # info
-    # images
-    # licenses
-    # annotations
+    data_ids = {}
+    # data_ids['train_ids'] = np.load("../data/coco_train_ids.npy")
+    # data_ids['test_ids'] = np.load("../data/coco_test_ids.npy")
+    # data_ids['dev_ids'] = np.load("../data/coco_dev_ids.npy")
+    # data_ids['restval_ids'] = np.load("../data/coco_restval_ids.npy")
 
-    # splits the training dictionary into images and captions
-    image_dict = train_dict["images"]
-    annotations_dict = train_dict["annotations"]
-    
-    # finds the number of images/captions
-    num_train_inputs = len(image_dict)
+    initialized_coco = cocoDataset(annotation_file="../data/captions_train2014.json")
 
-    # this prints out the image numbers that aren't accessible
-    for i in range(num_train_inputs):
-        image_url = image_dict[i]["flickr_url"]
-        try:
-             array = io.imread(image_url)
-        except:
-            print(i)
+    # print(initialized_coco.imgs)
+    # print(initialized_coco.anns)
+
+    data_ids['train_ids'] = list(initialized_coco.imgs.keys())
+    data_ids['test_ids'] = np.load("../data/coco_test_ids.npy")
+    data_ids['dev_ids'] = np.load("../data/coco_dev_ids.npy")
+    data_ids['restval_ids'] = np.load("../data/coco_restval_ids.npy")
+
+    print(data_ids['train_ids'])
+
+    a = initialized_coco.download(tarDir="/Users/jacobaxel/deepLearning/projects/csci-1470-final-project/data", imgIds=[data_ids['train_ids'][0]])
+    # print(a)
+    # one_image = initialized_coco.loadImgs([3, 6])
+    # print(one_image)
 
 
-    print(train_dict["images"][0]["id"])
-    print(train_dict["annotations"][train_dict["images"][0]["id"]])
+    # fiftyone stuffff
 
-    
-    # THIS IS TRYING TO LOAD THE DATASET FROM TENSORFLOW DATASETS
-    # ds = tfds.load('coco_captions', split='train')
-    # for example in ds:
-    #     print(example)
+    #
+    # Load 50 random samples from the validation split
+    #
+    # Only the required images will be downloaded (if necessary).
+    # By default, only detections are loaded
+    #
+
+    dataset = foz.load_zoo_dataset(
+        "coco-2014",
+        split="train",
+        max_samples=50,
+        shuffle=True,
+    )
+
+    # session = fo.launch_app(dataset, port=5051)
 
 
-    train_images = 0
-    train_captions = 0
-    test_images = 0
-    test_captions = 0
-
-    return train_images, train_captions, test_images, test_captions
+    return None
 	
 
 
