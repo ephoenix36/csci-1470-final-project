@@ -14,22 +14,6 @@ class MeshedMemoryModel(tf.keras.Model):
         self.batch_size = 100
         self.hidden_size = 50
 
-        ####################################################################
-        ################### MEMORY AUGMENTED ATTENTION #####################
-        ####################################################################
-        # Pass each image in input through these layers
-        self.wq = tf.keras.layers.Dense(self.hidden_size) # query
-        self.wk = tf.keras.layers.Dense(self.hidden_size) # key
-        self.wv = tf.keras.layers.Dense(self.hidden_size) # value
-        # in the parper they initialized these with a uniform distribution???
-        
-        # These are learnable params that get appended onto the end of wk and wv to help allowing us to learn knowledge about how two objects may be related
-        self.mk = tf.Variable(tf.random.normal([self.batch_size, self.hidden_size], stddev=.1)) 
-        self.mv = self.mk = tf.Variable(tf.random.normal([self.batch_size, self.hidden_size], stddev=.1))
-        
-        # This is applied to wq*x, k, v
-        #   k = [wk*x, mk]
-        #   v = [wv*x, mv]
         self.attention = tf.keras.layers.MultiHeadAttention()
         
         
