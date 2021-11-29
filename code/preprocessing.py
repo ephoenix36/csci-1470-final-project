@@ -34,7 +34,7 @@ def get_data(training_file, testing_file):
         except:
             print(i)
 
-
+    
     print(train_dict["images"][0]["id"])
     print(train_dict["annotations"][train_dict["images"][0]["id"]])
 
