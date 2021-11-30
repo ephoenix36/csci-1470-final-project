@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.engine.base_layer_utils import mark_as_return
+from utils import *
 
 
 class MeshedMemoryModel(tf.keras.Model):
