@@ -2,7 +2,7 @@ import tensorflow as tf
 
 class MultiHeadAttention(tf.keras.layers.Layer):
     
-    def __init__(self, units, kq_dim, v_dim, h, m):
+    def __init__(self, units, kq_dim, v_dim, h=8, m=100):
         """
         Args:
             units (int): Output dimensionality
@@ -32,6 +32,19 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     
     @tf.function
     def call(self, queries, keys, values, attention_mask=None):
-        mk = tf.sqrt(self.mk) * self.mk.expand()
-        # HEREEEEEEEEEEEEEE
-        pass
+        # TODO: see if attention mask is needed and add is so
+        
+        mk = tf.sqrt(self.mk) * tf.repeat(self.mk, [self.h * self.kq_dim], 0)
+        mk = tf.sqrt(self.m) * tf.repeat(self.mv, [self.h * self.kq_dim], 0)
+        
+        # TODO: check dims of following matrices
+        q = tf.transpose(self.wq(queries), perm=[0, 2, 1, 3]) # batch, h, nq?, kq_dim
+        k = tf.transpose(self.wk(keys), perm=[0, 2, 3, 1]) # batch, h, kq_dim, nk?
+        v = tf.transpose(self.wv(values), perm=[0, 2, 1, 3]) # batch, h, nk?, v_dim
+        
+        attention_matrix = tf.matmul(q, k) / tf.sqrt(self.kq_dim) # batch, h, nq?, nk?
+        attention_matrix = tf.nn.softmax(attention_matrix)
+        
+        output = tf.transpose(tf.matmul(attention_matrix, v), perm=[0, 2, 1, 3]) # batch, nq, h*d_v
+        output = self.wo(output)
+        return output
