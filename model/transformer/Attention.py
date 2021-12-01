@@ -2,7 +2,7 @@ import tensorflow as tf
 
 class MultiHeadAttention(tf.keras.layers.Layer):
     
-    def __init__(self, units, kq_dim, v_dim, h, m):
+    def __init__(self, units, kq_dim, v_dim, h=8, m=100):
         """
         Args:
             units (int): Output dimensionality
