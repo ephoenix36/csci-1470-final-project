@@ -4,55 +4,50 @@ import tensorflow_datasets as tfds
 import json
 from skimage import io
 
-def get_data(training_file, testing_file):
-    """
-    gets the training data from the data folder in the json file
-    """
+
+def build_dictionaries(file):
     
     # opens the json as a python dictionary
-    with open(training_file, 'r') as file:
+    with open(file, 'r') as file:
         train_dict = json.load(file)
-
-    # these are the different dictionaries inside the dataset
-    # info
-    # images
-    # licenses
-    # annotations
 
     # splits the training dictionary into images and captions
     image_dict = train_dict["images"]
-    annotations_dict = train_dict["annotations"]
-    
-    # finds the number of images/captions
-    num_train_inputs = len(image_dict)
+    caption_dict = {}
+    for element in train_dict["annotations"]:
+        id = str(element["image_id"])
+        if id not in caption_dict:
+            caption_dict[id] = [element["caption"]]
+        else:
+            caption_dict[id].append(element["caption"])
 
-    # this prints out the image indices that are accessible
-    with open('good_indices.txt', 'a') as f:
-        for i in range(num_train_inputs):
-            if i % 200 == 0:
-                print(i)
-            image_url = image_dict[i]["flickr_url"]
-            try:
-                array = io.imread(image_url)
-                f.write(str(i))
-                f.write("\n")
-            except:
-                pass
-    
-    # THIS IS TRYING TO LOAD THE DATASET FROM TENSORFLOW DATASETS
-    # ds = tfds.load('coco_captions', split='train')
-    # for example in ds:
-    #     print(example)
+    # return dictionaries
+    return image_dict, caption_dict
 
 
-    train_images = 0
-    train_captions = 0
-    test_images = 0
-    test_captions = 0
+def get_data_batch(image_dict, caption_dict, start_index, end_index):
 
-    return train_images, train_captions, test_images, test_captions
+    # lines a batch of images up with the identical captions
+    image_batch = []
+    caption_batch = []
+    for i in range(start_index,end_index):
+        image_batch.append(io.imread("http://images.cocodataset.org/train2014/" + image_dict[i]["file_name"]))
+        caption_batch.append(caption_dict[str(image_dict[i]["id"])])
+
+    # return batches
+    return image_batch, caption_batch
 	
 
-
 if __name__ == "__main__":
-    get_data('../data/captions_train2014.json','../data/captions_val2014.json')
+
+    # build the dictionaries
+    image_dict, caption_dict = build_dictionaries('../../data/captions_train2014.json')
+    # image_dict, caption_dict = build_dictionaries('../../data/captions_val2014.json')
+    print("Built dictionaries")
+
+    # find a batch of images and captions
+    num_images = len(image_dict)
+    batch_size = 100
+    for i in range(0, num_images, batch_size):
+        image_batch, caption_batch = get_data_batch(image_dict,caption_dict, i, i+batch_size)
+        print(i)
