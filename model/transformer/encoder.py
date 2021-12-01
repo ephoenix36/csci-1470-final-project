@@ -46,8 +46,7 @@ class MultiLevelEncoder(Layer):
             output = layer(output, output, output, attention_mask)
             outputs.append(output)
         
-        # in paper they also return the mask
-        return outputs
+        return outputs, attention_mask
     
 class MemoryAugmentedEncoder(MultiLevelEncoder):
     def __init__(self, num_layers, padding_idx, **kwargs):
@@ -60,5 +59,4 @@ class MemoryAugmentedEncoder(MultiLevelEncoder):
     @tf.function
     def call(self, input):
         output = self.f(input)
-        output = super(MemoryAugmentedEncoder, self).call(output)
-        return output
+        return super(MemoryAugmentedEncoder, self).call(output)

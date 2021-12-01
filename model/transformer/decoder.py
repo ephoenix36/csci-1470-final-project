@@ -74,7 +74,7 @@ class MeshedDecoder(Layer):
 
     @tf.function
     def call(self, input, encoder_output, mask_encoder_attention):
-        num_batches, seq_len = input.shape[:2]
+        seq_len = input.shape[:1]
         
         # TODO: check/fix masks
         mask_queries = input == self.padding_index
