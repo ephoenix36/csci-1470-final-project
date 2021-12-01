@@ -27,15 +27,24 @@ def build_dictionaries(file):
 
 def get_data_batch(image_dict, caption_dict, start_index, end_index):
 
-    # lines a batch of images up with the identical captions
-    image_batch = []
+    urls = []
     caption_batch = []
     for i in range(start_index,end_index):
-        image_batch.append(io.imread("http://images.cocodataset.org/train2014/" + image_dict[i]["file_name"]))
+        urls.append("http://images.cocodataset.org/train2014/" + image_dict[i]["file_name"])
         caption_batch.append(caption_dict[str(image_dict[i]["id"])])
+    image_batch = list(map(io.imread, urls))
+
+    return image_batch, caption_batch
+
+    # # lines a batch of images up with the identical captions
+    # image_batch = []
+    # caption_batch = []
+    # for i in range(start_index,end_index):
+    #     image_batch.append(io.imread("http://images.cocodataset.org/train2014/" + image_dict[i]["file_name"]))
+    #     caption_batch.append(caption_dict[str(image_dict[i]["id"])])
 
     # return batches
-    return image_batch, caption_batch
+    
 	
 
 if __name__ == "__main__":
