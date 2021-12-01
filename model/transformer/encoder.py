@@ -1,8 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Layer, Dense, LayerNormalization, Dropout
-from attention import *
-from utils import *
+from .attention import *
+from .utils import *
 
 class EncoderLayer(Layer):
     def __init__(self, output_size, key_size=64, value_size=64, hidden_size=1024, dropout=0.1):

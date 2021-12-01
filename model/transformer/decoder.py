@@ -1,8 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Layer, Dense, LayerNormalization, Dropout
-from attention import *
-from utils import *
+from .attention import *
+from .utils import *
 
 class MeshedDecoderLayer(Layer):
     def __init__(self, vocab_size, max_sentence_len, padding_index, output_size, kq_size=64, v_size=64, hidden_size=1024, dropout=0.1):
