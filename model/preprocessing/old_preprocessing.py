@@ -26,7 +26,7 @@ def build_dictionaries(file):
 
 
 def get_data_batch(image_dict, caption_dict, start_index, end_index):
-
+    
     urls = []
     caption_batch = []
     for i in range(start_index,end_index):
