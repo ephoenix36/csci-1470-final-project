@@ -50,4 +50,4 @@ if __name__ == "__main__":
     batch_size = 100
     for i in range(0, num_images, batch_size):
         image_batch, caption_batch = get_data_batch(image_dict,caption_dict, i, i+batch_size)
-        print(i)
+        print("Batch complete, image number", i)
