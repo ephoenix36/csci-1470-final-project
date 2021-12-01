@@ -13,8 +13,9 @@ Using coco dataset and tools: https://github.com/tylin/coco-caption
 from datetime import datetime
 import numpy as np
 import tensorflow as tf
-from .transformer.model import *
-from ..utils.utils import *
+from model.transformer.model import *
+# from .transformer.model import *
+from utils.utils import *
 
 # pip install -U tensorflow_datasets
 import tensorflow_datasets as tfds
@@ -89,24 +90,35 @@ def test(model, x_test, y_test, padding_index):
 def main():
 
     # TODO: add preprocessing
-    (x_train, y_train), (x_test, y_test) = tfds.load(
+    # (x_train, y_train), (x_test, y_test) = tfds.load(
+    #     'coco_captions',
+    #     split=['train', 'test'],
+    #     shuffle_files=True,
+    #     as_supervised=True,
+    #     with_info=True,
+    # )
+    
+    (x_test, y_test) = tfds.load(
         'coco_captions',
-        split=['train', 'test'],
+        split=['test'],
         shuffle_files=True,
         as_supervised=True,
         with_info=True,
     )
+    
+    for i in x_test.as_numpy_iterator():
+        print(i)
 
-    model = MeshedMemoryModel()  # TODO: fill in args
+    # model = MeshedMemoryModel()  # TODO: fill in args
 
-    train(model, x_train, y_train)
+    # train(model, x_train, y_train)
 
-    perplexity, accuracy = test(model, x_test, y_test)
-    print(f"Perplexity {perplexity}, Accuracy {accuracy}")
+    # perplexity, accuracy = test(model, x_test, y_test)
+    # print(f"Perplexity {perplexity}, Accuracy {accuracy}")
 
-    # TODO: figure out how to use tensorboard to visualize results
+    # # TODO: figure out how to use tensorboard to visualize results
 
-    pass
+    # pass
 
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from utils import *
-from encoder import *
-from decoder import *
+from .utils import *
+from .encoder import *
+from .decoder import *
 
 
 class MeshedMemoryModel(tf.keras.Model):
