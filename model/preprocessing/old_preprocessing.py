@@ -26,7 +26,8 @@ def build_dictionaries(file):
 
 
 def get_data_batch(image_dict, caption_dict, start_index, end_index):
-    
+
+    # finds a batch of images and captions by looking up via url online
     urls = []
     caption_batch = []
     for i in range(start_index,end_index):
@@ -34,24 +35,14 @@ def get_data_batch(image_dict, caption_dict, start_index, end_index):
         caption_batch.append(caption_dict[str(image_dict[i]["id"])])
     image_batch = list(map(io.imread, urls))
 
+    # returns the batches
     return image_batch, caption_batch
-
-    # # lines a batch of images up with the identical captions
-    # image_batch = []
-    # caption_batch = []
-    # for i in range(start_index,end_index):
-    #     image_batch.append(io.imread("http://images.cocodataset.org/train2014/" + image_dict[i]["file_name"]))
-    #     caption_batch.append(caption_dict[str(image_dict[i]["id"])])
-
-    # return batches
-    
 	
 
 if __name__ == "__main__":
 
     # build the dictionaries
     image_dict, caption_dict = build_dictionaries('../../data/captions_train2014.json')
-    # image_dict, caption_dict = build_dictionaries('../../data/captions_val2014.json')
     print("Built dictionaries")
 
     # find a batch of images and captions
