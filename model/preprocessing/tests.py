@@ -71,25 +71,32 @@ def build_dictionaries(file):
     return image_dict, caption_dict
 
 
-def get_data_batch(image_dict, caption_dict, image_directory):
+def get_image_batch(image_dict, bbox_dict, image_directory):
 
-    
-
-    # finds a batch of images and captions by looking up via url online
-    # real_image_dict = {}
-    # for element in image_dict:
-    #     image_id = str(element["id"])
-    #     image_dict[image_id] = np.asarray(Image.open(image_directory + element["file_name"]))
-
-    caption_batch = []
     image_batch = []
     for i in range(0,100):
-        location = image_directory + image_dict[i]["file_name"]
-        image_batch.append(np.asarray(Image.open(location)))
-        caption_batch.append(caption_dict[str(image_dict[i]["id"])])
 
-    # returns the batches
-    return image_batch, caption_batch
+        # get the big image
+        location = image_directory + image_dict[i]["file_name"]
+        big_image = np.asarray(Image.open(location))
+
+        # get the bboxes for the image (if they exist)
+        key = str(image_dict[i]["id"])
+        if key in bbox_dict:
+            bboxes = bbox_dict[key]
+        else:
+            bboxes = [[0,0,big_image.shape[0],big_image.shape[1]]]
+
+        # apply bboxes to the image to generate subimage_list
+        subimage_list = []
+        for i in range(len(bboxes)):
+            xmin, ymin, width, height = bboxes[i]
+            subimage = big_image[int(ymin):int(ymin+height),int(xmin):int(xmin+width),:]
+            subimage_list.append(subimage)
+        image_batch.append(subimage_list)
+    
+    # returns the batch
+    return image_batch
 	
 
 if __name__ == "__main__":
@@ -108,8 +115,6 @@ if __name__ == "__main__":
     num_images = len(image_dict)
     batch_size = 100
     for i in range(0, num_images, batch_size):
-        image_batch, caption_batch = get_data_batch(image_dict,caption_dict,"../../coco-2014/train/data/")
+        image_batch = get_image_batch(image_dict,bbox_dict,"../../coco-2014/train/data/")
         print("Batch complete, image number", i)
-        print(len(image_batch))
-        print(image_batch[0].shape)
         break
