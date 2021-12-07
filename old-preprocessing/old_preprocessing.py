@@ -42,7 +42,7 @@ def get_data_batch(image_dict, caption_dict, start_index, end_index):
 if __name__ == "__main__":
 
     # build the dictionaries
-    image_dict, caption_dict = build_dictionaries('../../data/captions_train2014.json')
+    image_dict, caption_dict = build_dictionaries('../data/captions_train2014.json')
     print("Built dictionaries")
 
     # find a batch of images and captions

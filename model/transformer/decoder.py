@@ -1,8 +1,10 @@
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Layer, Dense, LayerNormalization, Dropout
-from .attention import *
-from .utils import *
+from attention import *
+
+from model.transformer.Attention import MultiHeadAttention
+from model.transformer.utils import *
 
 class MeshedDecoderLayer(Layer):
     def __init__(self, vocab_size, max_sentence_len, padding_index, output_size, kq_size=64, v_size=64, hidden_size=1024, dropout=0.1):
@@ -64,10 +66,10 @@ class MeshedDecoder(Layer):
         
         # TODO: add word and positional embeddings
         self.word_embeddings = tf.Variable(tf.random.normal(
-            [vocab_size, word_embedding_size], stddev=.1, dtype=tf.float32))
+            [vocab_size, int(word_embedding_size)], stddev=.1, dtype=tf.float32))
         self.positional_embeddings = Position_Encoding_Layer(max_sentence_len + 1, output_size)
         
-        self.layers = [MeshedDecoder(vocab_size, max_sentence_len, padding_index, output_size, kq_size, v_size, hidden_size, dropout) for _ in range(num_layers)]
+        self.layers = [MeshedDecoderLayer(vocab_size, max_sentence_len, padding_index, output_size, kq_size, v_size, hidden_size, dropout) for _ in range(num_layers)]
         
         self.f = Dense(vocab_size, use_bias=False, activation='softmax')
     

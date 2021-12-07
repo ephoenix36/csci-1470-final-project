@@ -1,0 +1,6 @@
+*.pyc
+*.pyo
+.idea/
+model/dataset/
+model/train2014/
+model/annotations/

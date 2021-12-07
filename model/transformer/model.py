@@ -1,8 +1,8 @@
 import numpy as np
 import tensorflow as tf
-from .utils import *
-from .encoder import *
-from .decoder import *
+from utils import *
+from model.transformer.encoder import *
+from model.transformer.decoder import *
 
 
 class MeshedMemoryModel(tf.keras.Model):
@@ -13,7 +13,7 @@ class MeshedMemoryModel(tf.keras.Model):
         self.batch_size = 100
         self.hidden_size = 50
         
-        num_layers = 10
+        # num_layers = 10
 
         # TODO: fill in other args
         self.encoder = MemoryAugmentedEncoder(num_layers, padding_index)
