@@ -195,7 +195,7 @@ def post_preprocess():
     path = os.path.abspath('') + '/dataset/'
     spec = (tf.TensorSpec(shape=None, dtype=tf.float32, name=None), tf.TensorSpec(shape=None, dtype=tf.int32, name=None))
     dataset = tf.data.experimental.load(path, spec)
-    return_values = np.load(os.path.abspath('.') + '/preprocess_data')
+    return_values = np.load(os.path.abspath('.') + '/preprocess_data.npy')
     
     # shuffle and batch dataset
     BATCH_SIZE = 64
