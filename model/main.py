@@ -13,6 +13,7 @@ def main():
     num_layers = 10
     padding_index = parameters[2]
     output_size = 10
+    num_steps = parameters[3]
 
     model = MeshedMemoryModel(vocab_size, max_sentence_len, num_layers, padding_index, output_size)
 
@@ -20,7 +21,7 @@ def main():
     decoder = model.decoder
     loss_function = model.loss_function
 
-    # train(dataset, 10, encoder, decoder, tokenizer, loss_function)
+    train(dataset, num_steps, encoder, decoder, tokenizer, loss_function)
 
 def train(dataset, num_steps, encoder, decoder, tokenizer, loss_function):
 

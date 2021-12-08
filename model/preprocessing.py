@@ -193,11 +193,11 @@ def get_and_store_data():
         map_func, [item1, item2], [tf.float32, tf.int32]),
                           num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-    return_values = np.array([vocab_size, max_cap_length, pad_index])
+    main_parameters = np.array([vocab_size, max_cap_length, pad_index, num_steps])
 
     path_to_dataset = os.path.abspath('.') + '/dataset/'
     tf.data.experimental.save(dataset, path_to_dataset)
-    np.save(os.path.abspath('.') + '/preprocess_data', return_values)
+    np.save(os.path.abspath('.') + '/preprocess_data', main_parameters)
 
     tokenizer_json = tokenizer.to_json()
     with io.open('tokenizer.json', 'w', encoding='utf-8') as f:
