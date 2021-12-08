@@ -1,6 +1,6 @@
 import preprocessing
 
-from model.transformer.meshedModel import *
+from transformer.meshedModel import *
 
 
 def main():

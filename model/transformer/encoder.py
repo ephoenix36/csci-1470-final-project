@@ -2,9 +2,8 @@ import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Layer, Dense, LayerNormalization, Dropout
 
-from model.transformer.Attention import MultiHeadAttention
-from attention import *
-from model.transformer.utils import *
+from transformer.Attention import MultiHeadAttention
+from transformer.utils import *
 
 
 class EncoderLayer(Layer):
