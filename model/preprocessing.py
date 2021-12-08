@@ -16,10 +16,6 @@ def load_image(image_path):
     img = tf.keras.applications.inception_v3.preprocess_input(img)
     return img, image_path
 
-# Find the maximum length of any caption in the dataset
-def calc_max_length(tensor):
-    return 
-
 # Load the numpy files
 def map_func(img_name, cap):
     img_tensor = np.load(img_name.decode('utf-8')+'.npy')
