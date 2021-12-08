@@ -18,7 +18,7 @@ def load_image(image_path):
 
 # Find the maximum length of any caption in the dataset
 def calc_max_length(tensor):
-    return max(len(t) for t in tensor)
+    return 
 
 # Load the numpy files
 def map_func(img_name, cap):
@@ -133,9 +133,7 @@ def preprocess():
 
 
     # Calculates the max_length, which is used to store the attention weights
-    max_length = calc_max_length(train_seqs)
-
-
+    max_length = max(len(t) for t in train_seqs)
 
     img_to_cap_vector = collections.defaultdict(list)
     for img, cap in zip(img_name_vector, cap_vector):
