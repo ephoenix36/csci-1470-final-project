@@ -6,7 +6,7 @@ from transformer.meshedModel import *
 
 def main():
 
-    dataset, parameters = preprocessing.post_preprocess()
+    dataset, parameters, tokenizer = preprocessing.preprocess()
 
     vocab_size = parameters[0]
     max_sentence_len = parameters[1]
@@ -16,13 +16,11 @@ def main():
 
     model = MeshedMemoryModel(vocab_size, max_sentence_len, num_layers, padding_index, output_size)
 
-    
+    encoder = model.encoder
+    decoder = model.decoder
+    loss_function = model.loss_function
 
-
-if __name__ == '__main__':
-    main()
-
-
+    # train(dataset, 10, encoder, decoder, tokenizer, loss_function)
 
 def train(dataset, num_steps, encoder, decoder, tokenizer, loss_function):
 
@@ -35,7 +33,7 @@ def train(dataset, num_steps, encoder, decoder, tokenizer, loss_function):
         total_loss = 0
 
         for (batch, (img_tensor, target)) in enumerate(dataset):
-            batch_loss, t_loss = train_step(img_tensor, target)
+            batch_loss, t_loss = train_step(img_tensor, target, encoder, decoder, tokenizer, loss_function)
             total_loss += t_loss
 
             if batch % 100 == 0:
@@ -52,7 +50,7 @@ def train(dataset, num_steps, encoder, decoder, tokenizer, loss_function):
 
 
 @tf.function
-def train_step(img_tensor, target):
+def train_step(img_tensor, target, encoder, decoder, tokenizer, loss_function):
 
     loss = 0
     optimizer = tf.keras.optimizers.Adam()
@@ -81,3 +79,7 @@ def train_step(img_tensor, target):
     optimizer.apply_gradients(zip(gradients, trainable_variables))
 
     return loss, total_loss
+
+
+if __name__ == '__main__':
+    main()
