@@ -91,3 +91,6 @@ class MeshedDecoder(Layer):
         
         output = self.f(output)
         return output
+    
+    def reset_state(self, batch_size):
+        return tf.zeros((batch_size, self.output_size))

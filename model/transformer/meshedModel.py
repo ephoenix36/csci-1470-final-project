@@ -12,6 +12,7 @@ class MeshedMemoryModel(tf.keras.Model):
         self.learning_rate = 0.01
         self.batch_size = 100
         self.hidden_size = 50
+        self.output_size = output_size
         
         # num_layers = 10
 

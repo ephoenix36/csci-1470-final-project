@@ -62,5 +62,6 @@ class MemoryAugmentedEncoder(MultiLevelEncoder):
 
     @tf.function
     def call(self, input):
+        
         output = self.f(input)
         return super(MemoryAugmentedEncoder, self).call(output)
