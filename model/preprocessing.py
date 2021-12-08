@@ -22,6 +22,7 @@ def map_func(img_name, cap):
     return img_tensor, cap
 
 def preprocess():
+
     # Download caption annotation files
     annotation_folder = '/annotations/'
     if not os.path.exists(os.path.abspath('') + annotation_folder):
@@ -113,6 +114,7 @@ def preprocess():
 
     tokenizer.word_index['<pad>'] = 0
     tokenizer.index_word[0] = '<pad>'
+    pad_index = 0
 
 
 
@@ -124,7 +126,7 @@ def preprocess():
     # Pad each vector to the max_length of the captions
     # If you do not provide a max_length value, pad_sequences calculates it automatically
     cap_vector = tf.keras.preprocessing.sequence.pad_sequences(train_seqs, padding='post')
-
+    max_cap_length = cap_vector.shape[1]
 
 
 
@@ -181,7 +183,10 @@ def preprocess():
             map_func, [item1, item2], [tf.float32, tf.int32]),
             num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
-    return dataset
+
+    return_values = np.array([vocab_size, max_cap_length, pad_index])
+
+    return dataset, return_values
 
 
 def post_preprocess():
@@ -190,19 +195,22 @@ def post_preprocess():
     path = os.path.abspath('') + '/dataset/'
     spec = (tf.TensorSpec(shape=None, dtype=tf.float32, name=None), tf.TensorSpec(shape=None, dtype=tf.int32, name=None))
     dataset = tf.data.experimental.load(path, spec)
+    return_values = np.load(os.path.abspath('.') + '/preprocess_data')
     
     # shuffle and batch dataset
     BATCH_SIZE = 64
     BUFFER_SIZE = 1000
     adjusted_dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
     adjusted_dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
-    return adjusted_dataset
+
+    return adjusted_dataset, return_values
 
 if __name__ == '__main__':
 
-    # dataset = preprocess()
+    # dataset, return_values = preprocess()
     # path = os.path.abspath('.') + '/dataset/'
     # tf.data.experimental.save(dataset, path)
+    # np.save(os.path.abspath('.') + '/preprocess_data', return_values)
 
     print("load start")
     post_preprocess()

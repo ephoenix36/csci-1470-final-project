@@ -1,17 +1,21 @@
 import preprocessing
-from model.transformer.model import MeshedMemoryModel
+
+from model.transformer.model import *
 
 
 def main():
-    vocab_size = 10
-    max_sentence_len = 10
+
+    dataset, parameters = preprocessing.post_preprocess()
+
+    vocab_size = parameters[0]
+    max_sentence_len = parameters[1]
     num_layers = 10
-    padding_index = 10
+    padding_index = parameters[2]
     output_size = 10
 
     model = MeshedMemoryModel(vocab_size, max_sentence_len, num_layers, padding_index, output_size)
 
-    dataset = preprocessing.post_preprocess()
+    
 
 
 if __name__ == '__main__':
