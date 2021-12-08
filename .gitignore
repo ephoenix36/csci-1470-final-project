@@ -4,3 +4,4 @@
 model/dataset/
 model/train2014/
 model/annotations/
+model/tokenizer.json
