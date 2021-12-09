@@ -19,8 +19,8 @@ class EncoderLayer(Layer):
         self.ff = PositionWiseFeedForward(output_size, hidden_size, dropout)
 
     @tf.function
-    def call(self, queries, keys, values):
-        output = self.attention(queries, keys, values)
+    def call(self, queries, keys, values, attention_mask):
+        output = self.attention(queries, keys, values, attention_mask)
         output = self.ff(output)
         return output
 
