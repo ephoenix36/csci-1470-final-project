@@ -1,52 +1,60 @@
 import tensorflow as tf
+from tensorflow.keras.layers import Layer, Dense, Dropout, LayerNormalization
 
 
-class MultiHeadAttention(tf.keras.layers.Layer):
+class MemoryMultiHeadAttention(Layer):
 
-    def __init__(self, units, kq_dim, v_dim, h=8, m=100):
+    def __init__(self, output_dim, kq_dim, v_dim, num_heads=10, mem_dim=100, dropout=0.1):
         """
         Args:
-            units (int): Output dimensionality
+            output_dim (int): Output dimensionality
             kq_dim (int): Dimensionality of keys and queries
             v_dim (int): Dimensionality of values
-            h (int): Number of heads
-            m (int): Number of memory slots
+            num_heads (int): Number of heads
+            mem_dim (int): Number of memory slots
         """
-        super(MultiHeadAttention, self).__init__()
+        super(MemoryMultiHeadAttention, self).__init__()
 
-        self.units = units
+        # Initialization of ScaledDotProductAttentionMemory
+        self.output_dim = output_dim
         self.kq_dim = kq_dim
         self.v_dim = v_dim
-        self.h = h
-        self.m = m
+        self.num_heads = num_heads
+        self.mem_dim = mem_dim
         
         # print("MHA units:", units)
         # print("MHA kq_dim:", kq_dim)
         # print("MHA v_dim", v_dim)
 
-        self.wk = tf.keras.layers.Dense(h * kq_dim)  # key
-        self.wv = tf.keras.layers.Dense(h * kq_dim)  # value
-        self.wq = tf.keras.layers.Dense(h * v_dim)  # query
-        self.wo = tf.keras.layers.Dense(units)
-        # in the paper they initialized these with a uniform distribution???
-
-        # These are learnable params that get appended onto the end of wk and wv to help allowing us to learn knowledge about how two objects may be related
-        self.mk = tf.Variable(tf.random.normal([1, m, int(h * kq_dim)], stddev=.1))
-        self.mv = self.mk = tf.Variable(tf.random.normal([1, m, int(h * v_dim)], stddev=.1))
-        # standard devisations in paper seem to be 1 / kq_dim and 1 / v_dim
-        print(self.mk.shape)
-        print("odnawndaw", self.mv.shape)
-
-    @tf.function
-    def call(self, queries, keys, values, attention_mask=None):
-        # TODO: see if attention mask is needed and add is so
-
-        print(self.mk)
-        mk = tf.sqrt(float(self.mk)) * tf.repeat(self.mk, [self.h * self.kq_dim], 0)
-        mv = tf.sqrt(float(self.m)) * tf.repeat(self.mv, [self.h * self.kq_dim], 0)
+        self.wk = Dense(num_heads * kq_dim)  # key
+        self.wv = Dense(num_heads * kq_dim)  # value
+        self.wq = Dense(num_heads * v_dim)  # query
         
-        print("mk shape:", mk.shape)
-        print("mv shape:", mv.shape)
+        self.dense_1 = Dense(output_dim)
+        self.dropout = Dropout(rate=dropout)
+        self.layer_norm = LayerNormalization()
+
+        # These are learnable params that get appended onto the end of wk and wv, allowing us to learn knowledge about how two features may be related
+        self.mk = tf.Variable(tf.random.normal([1, mem_dim, int(num_heads * kq_dim)], stddev=.1 / self.kq_dim))
+        self.mv = tf.Variable(tf.random.normal([1, mem_dim, int(num_heads * v_dim)], stddev=.1 / self.mem_dim))
+        print("mk shape:", self.mk.shape)
+        print("mv shape:", self.mv.shape)
+
+    # @tf.function
+    def call(self, queries, keys, values, attention_mask=None):
+        
+        batch_size =  queries.shape[0]
+        
+        print("mk shape:", self.mk.shape)
+        print("mv shape:", self.mv.shape)
+
+        # mk = tf.sqrt(float(self.kq_dim)) * tf.repeat(self.mk, batch_size, 0)
+        # mv = tf.sqrt(float(self.mem_dim)) * tf.repeat(self.mv, batch_size, 0)
+        # mk = tf.repeat(self.mk, batch_size, 0)
+        # mv = tf.repeat(self.mv, batch_size, 0)
+        
+        # print("mk shape:", mk.shape)
+        # print("mv shape:", mv.shape)
 
         # TODO: check dims of following matrices
         q = tf.transpose(self.wq(queries), perm=[0, 2, 1, 3])  # batch, h, nq?, kq_dim

@@ -2,11 +2,11 @@ import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Layer, Dense, LayerNormalization, Dropout
 
-from transformer.attention import MultiHeadAttention
+from transformer.attention import MemoryMultiHeadAttention
 from transformer.utils import *
 
 class MeshedDecoderLayer(Layer):
-    def __init__(self, vocab_size, max_sentence_len, padding_index, output_size, kq_size=64, v_size=64, hidden_size=1024, dropout=0.1):
+    def __init__(self, vocab_size, max_sentence_len, padding_index, output_size, kq_size=64, v_size=64, hidden_dim=1024, dropout=0.1):
         super(MeshedDecoderLayer, self).__init__()
         
         self.vocab_size = vocab_size
@@ -15,28 +15,26 @@ class MeshedDecoderLayer(Layer):
         self.output_size = output_size
         self.kq_size = kq_size
         self.v_size = v_size
-        self.hidden_size = hidden_size
+        self.hidden_dim = hidden_dim
         self.dropout = dropout
         
-        # TODO: look into can_be_stateful field
-        self.self_attention = MultiHeadAttention(output_size, kq_size, v_size)
-        self.encoder_attention = MultiHeadAttention(output_size, kq_size, v_size)
+        self.self_attention = MemoryMultiHeadAttention(output_size, kq_size, v_size, dropout=dropout)
+        self.encoder_attention = MemoryMultiHeadAttention(output_size, kq_size, v_size, dropout=dropout)
         
-        self.ff = PositionWiseFeedForward(output_size, hidden_size, dropout)
+        self.pwff = PositionWiseFeedForward(output_size, hidden_dim, dropout)
         
         self.alpha1 = Dense(output_size, activation='sigmoid')
         self.alpha2 = Dense(output_size, activation='sigmoid')
         self.alpha3 = Dense(output_size, activation='sigmoid')
     
-    # TODO: try and understand what is going on here
     @tf.function
     def call(self, input, encoder_output, mask_pad, mask_self_attention, mask_encoder_attention):
-        self_att = self.self_attention(input, input, input)
+        self_att = self.self_attention(input, input, input, mask_self_attention)
         self_att *= mask_pad
         
-        encoder_att1 = self.encoder_attention(self_att, encoder_output[:, 0], encoder_output[:, 0])
-        encoder_att2 = self.encoder_attention(self_att, encoder_output[:, 1], encoder_output[:, 1])
-        encoder_att3 = self.encoder_attention(self_att, encoder_output[:, 2], encoder_output[:, 2])
+        encoder_att1 = self.encoder_attention(self_att, encoder_output[:, 0], encoder_output[:, 0], mask_encoder_attention)
+        encoder_att2 = self.encoder_attention(self_att, encoder_output[:, 1], encoder_output[:, 1], mask_encoder_attention)
+        encoder_att3 = self.encoder_attention(self_att, encoder_output[:, 2], encoder_output[:, 2], mask_encoder_attention)
         
         alpha1 = self.alpha1(tf.concat([self_att, encoder_att1], -1))
         alpha2 = self.alpha2(tf.concat([self_att, encoder_att2], -1))
@@ -45,8 +43,8 @@ class MeshedDecoderLayer(Layer):
         encoder_attention = (encoder_att1 * alpha1 + encoder_att2 * alpha2 + encoder_att3 * alpha3) / tf.sqrt(3)
         encoder_attention * mask_pad
         
-        output = self.ff(encoder_attention)
-        output = self.ff * mask_pad
+        output = self.pwff(encoder_attention)
+        output = self.pwff * mask_pad
         return output
     
 class MeshedDecoder(Layer):
@@ -63,7 +61,7 @@ class MeshedDecoder(Layer):
         self.hidden_size = hidden_size
         self.dropout = dropout
         
-        # TODO: add word and positional embeddings
+        # TODO: POTENTIAL SOURCE OF ERROR
         self.word_embeddings = tf.Variable(tf.random.normal(
             [vocab_size, int(word_embedding_size)], stddev=.1, dtype=tf.float32))
         self.positional_embeddings = Position_Encoding_Layer(max_sentence_len + 1, output_size)
@@ -75,15 +73,17 @@ class MeshedDecoder(Layer):
 
     @tf.function
     def call(self, input, encoder_output, mask_encoder_attention):
-        seq_len = input.shape[:1]
+        batch_size, seq_len = input.shape[:2]
         
         # TODO: check/fix masks
-        mask_queries = input == self.padding_index
+        mask_queries = tf.expand_dims(input != self.padding_index, -1)
         
-        mask_self_attention = tf.experimental.numpy.tril(tf.ones(seq_len, seq_len))
-        mask_self_attention += input == self.padding_index
+        mask_self_attention = tf.experimental.numpy.triu(tf.ones(seq_len, seq_len))
+        mask_self_attention = tf.expand_dims(tf.expand_dims(mask_self_attention, 0))
+        mask_self_attention = tf.expand_dims(tf.expand_dims(input == self.padding_index, 1), 1)
         
-        seq = tf.boolean_mask(input, mask_queries)
+        seq = tf.repeat(tf.reshape(tf.range(1, seq_len + 1), [1, -1]), batch_size, 0)
+        seq *= tf.boolean_mask(input, tf.squeeze(mask_queries, -1) == 0)
         
         output = self.word_embeddings(input) + self.positional_embeddings(seq)
         for layer in self.layers:
@@ -91,6 +91,3 @@ class MeshedDecoder(Layer):
         
         output = self.f(output)
         return output
-    
-    def reset_state(self, batch_size):
-        return tf.zeros((batch_size, self.output_size))

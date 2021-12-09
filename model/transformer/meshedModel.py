@@ -28,6 +28,9 @@ class MeshedMemoryModel(tf.keras.Model):
         encoder_output, mask_encoder = self.encoder(images)
         decoder_output = self.decoder(seq, encoder_output, mask_encoder)
         return decoder_output, mask_encoder
+    
+    def init_state(self):
+        return [tf.zeros(self.batch_size, 0), None, None]
 
 # TODO: BELOW IS FROM PREVIOUS ASSIGNMENT (CHANGE...)
     def accuracy_function(self, prbs, labels, mask):

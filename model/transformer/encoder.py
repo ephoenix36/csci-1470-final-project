@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Layer, Dense, LayerNormalization, Dropout
 
-from transformer.Attention import MultiHeadAttention
+from transformer.attention import MemoryMultiHeadAttention
 from transformer.utils import *
 
 
@@ -14,14 +14,14 @@ class EncoderLayer(Layer):
         self.hidden_size = hidden_size
         self.dropout = dropout
 
-        self.attention = MultiHeadAttention(output_size, key_size, value_size)
+        self.attention = MemoryMultiHeadAttention(output_size, key_size, value_size, dropout=dropout)
 
-        self.ff = PositionWiseFeedForward(output_size, hidden_size, dropout)
+        self.pwff = PositionWiseFeedForward(output_size, hidden_size, dropout)
 
     @tf.function
     def call(self, queries, keys, values, attention_mask):
         output = self.attention(queries, keys, values, attention_mask)
-        output = self.ff(output)
+        output = self.pwff(output)
         return output
 
 
@@ -40,8 +40,8 @@ class MultiLevelEncoder(Layer):
 
     @tf.function
     def call(self, input):
-        attention_mask = (input == self.padding_index)
-        # in paper they unsqueeze this mask to (batch, 1, 1, seq_len)
+        attention_mask = tf.reduce_sum(input, -1) == self.padding_index
+        attention_mask = tf.expand_dims(tf.expand_dims(attention_mask, 1), 1)
 
         outputs = []
         output = input
@@ -62,6 +62,5 @@ class MemoryAugmentedEncoder(MultiLevelEncoder):
 
     @tf.function
     def call(self, input):
-        
         output = self.f(input)
         return super(MemoryAugmentedEncoder, self).call(output)

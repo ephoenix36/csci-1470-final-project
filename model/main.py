@@ -1,3 +1,15 @@
+'''
+USEFUL LINKS:
+
+Paper: https://arxiv.org/pdf/1912.08226v2.pdf
+Paper's Github: https://github.com/aimagelab/meshed-memory-transformer
+
+Using tensorflow datasets: https://www.tensorflow.org/datasets/keras_example
+
+LESS USEFUL LINKS:
+Using coco dataset and tools: https://github.com/tylin/coco-caption
+'''
+
 import preprocessing
 import time
 
