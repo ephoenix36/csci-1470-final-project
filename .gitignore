@@ -1,7 +1,10 @@
 *.pyc
 *.pyo
 .idea/
-model/dataset/
-model/train2014/
-model/annotations/
-model/tokenizer.json
+models/data/dataset/
+models/data/train2014/
+models/data/annotations/
+models/data/tokenizer.json
+models/data/preprocess_data.npy
+models/data/cap_val.npy
+models/data/img_name_val.npy
